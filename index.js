@@ -7,6 +7,7 @@ let notes = require('./db.json').notes
 
 const app = express()
 
+app.use(express.static('build'))
 app.use(express.json())
 // app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 morgan.token('body', (req, res) => {
@@ -41,15 +42,15 @@ const unknownEndpoint = (req, res) => {
     res.status(404).send({error: 'unknown endpoint'})
 }
 
-// app.get('/', (req, res) => {
-//     res.status(200).send(JSON.stringify(notes))
-// })
-
-app.get('/notes', (req, res) => {
+app.get('/', (req, res) => {
     res.status(200).send(JSON.stringify(notes))
 })
 
-app.post('/notes', (req, res) => {
+app.get('/api/notes', (req, res) => {
+    res.status(200).send(JSON.stringify(notes))
+})
+
+app.post('/api/notes', (req, res) => {
     const note = req.body
     notes.push(note)
     fs.writeFile('./db.json', JSON.stringify({notes: notes}) ,err => {
@@ -58,7 +59,7 @@ app.post('/notes', (req, res) => {
     })
 })
 
-app.put('/notes/:id', (req, res) => {
+app.put('/api/notes/:id', (req, res) => {
     const note = req.body
     const id = Number(req.params.id)
     notes = notes.map(n => n.id === id ? note : n)
