@@ -53,23 +53,30 @@ app.get('/api/notes', (req, res) => {
 app.post('/api/notes', (req, res) => {
     const note = req.body
     notes.push(note)
-    fs.writeFile('./db.json', JSON.stringify({notes: notes}) ,err => {
+    
+    fs.writeFile('./db.json', JSON.stringify({notes: notes}), err => {
         if (!err)
             res.status(200).send(JSON.stringify(note))
+        else 
+            res.status(404).end()
     })
 })
 
 app.put('/api/notes/:id', (req, res) => {
-    const note = req.body
     const id = Number(req.params.id)
-    notes = notes.map(n => n.id === id ? note : n)
+    const note = notes.find(n => n.id === id)
 
-    fs.writeFile('./db.json', JSON.stringify({notes: notes}), err => {
-        if (!err)
-            res.send(JSON.stringify(note))
-        else 
-            return 
-    })
+    if (note) {
+        notes = notes.map(n => n.id === id ? req.body : n)
+        fs.writeFile('./db.json', JSON.stringify({notes: notes}), err => {
+            if (!err) 
+                res.status(200).send(JSON.stringify(req.body))
+            else
+                res.status(404).end()
+        })
+    } else {
+        res.status(404).end()
+    }
 })
 
 app.use(unknownEndpoint)
